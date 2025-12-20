@@ -15,6 +15,8 @@ const treatmentRouter = require("./routes/treatmentRouter");
 const skinAnalysisRecordRouter = require("./routes/skinAnalysisRecordRouter");
 const adminRouter = require("./routes/adminRouter");
 const environmentDataRouter = require("./routes/environmentDataRouter");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 
 app.use(cookieParser());
 app.use(express.json());
@@ -46,3 +48,13 @@ app.use("/api", analysis);
 app.use("/api", skinRouter);
 app.use("/api", treatmentRouter);
 app.use("/api", skinAnalysisRecordRouter);
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      withCredentials: true,
+    },
+  })
+);
