@@ -172,10 +172,10 @@ const createSkin = async (req, res) => {
  *             schema:
  *               $ref: "#/components/schemas/ErrorResponse"
  */
-const getSkinById = async (req, res) => {
-  const { id } = req.params;
+const getSkinByUserId = async (req, res) => {
+  const { userId } = req.params;
   try {
-    const skin = await models.Skin.findByPk(id);
+    const skin = await models.Skin.findOne({ where: { user_id: userId } });
     if (skin) {
       res.json(skin);
     } else {
@@ -371,6 +371,7 @@ module.exports = {
   createSkin,
   getSkinById,
   getAllSkins,
+  getSkinByUserId,
   updateSkin,
   deleteSkin,
 };
