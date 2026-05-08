@@ -16,7 +16,7 @@ const {
 userRouter.post("/login", login);
 userRouter.post("/register", createUser);
 userRouter.get("/users/me", authMiddleware, getUserByToken);
-userRouter.get("/users", authMiddleware, getAllUsers);
+userRouter.get("/users", getAllUsers);
 userRouter.get("/users/:id", authMiddleware, getUserById);
 userRouter.put("/users/:id", authMiddleware, updateUser);
 userRouter.delete("/users/:id", authMiddleware, deleteUser);
