@@ -854,3 +854,43 @@ td {
     display: grid;
   }
 }
+.table-input {
+  width: 100%;
+  min-width: 180px;
+  padding: 9px 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.table-input:focus {
+  border-color: var(--green);
+}
+
+.table-textarea {
+  width: 100%;
+  min-width: 260px;
+  min-height: 58px;
+  padding: 9px 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  resize: vertical;
+  font: inherit;
+}
+
+.table-textarea:focus {
+  border-color: var(--green);
+  outline: none;
+}
+
+.table-save-btn {
+  padding: 9px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}

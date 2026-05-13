@@ -2,17 +2,6 @@ import { useState } from "react";
 import { Eye, EyeOff, Leaf } from "lucide-react";
 import { api } from "../services/api";
 
-const skinTypes = [
-  "Normal",
-  "Суха шкіра",
-  "Жирна шкіра",
-  "Комбінована шкіра",
-  "Чутлива шкіра",
-  "Зневоднена шкіра",
-  "Подразнена шкіра",
-  "Проблемна шкіра з висипаннями",
-];
-
 export default function AuthPage({ t, lang, setLang, onAuth }) {
   const [mode, setMode] = useState("login");
 
@@ -20,8 +9,6 @@ export default function AuthPage({ t, lang, setLang, onAuth }) {
     name: "",
     email: "",
     password: "",
-    skin_type: skinTypes[0],
-    skin_description: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -46,13 +33,7 @@ export default function AuthPage({ t, lang, setLang, onAuth }) {
       const user =
         mode === "login"
           ? await api.login(form.email, form.password)
-          : await api.register(
-              form.name,
-              form.email,
-              form.password,
-              form.skin_type,
-              form.skin_description
-            );
+          : await api.register(form.name, form.email, form.password);
 
       onAuth({ ...user, is_admin: Boolean(user.is_admin) });
     } catch (error) {
@@ -181,38 +162,6 @@ export default function AuthPage({ t, lang, setLang, onAuth }) {
               </button>
             </div>
           </label>
-
-          {mode === "register" && (
-            <>
-              <label>
-                Тип шкіри
-                <select
-                  value={form.skin_type}
-                  onChange={(e) =>
-                    setForm({ ...form, skin_type: e.target.value })
-                  }
-                >
-                  {skinTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Опис стану шкіри
-                <textarea
-                  className="analysis-result-input"
-                  value={form.skin_description}
-                  onChange={(e) =>
-                    setForm({ ...form, skin_description: e.target.value })
-                  }
-                  placeholder="Наприклад: є сухість, подразнення або висипання..."
-                />
-              </label>
-            </>
-          )}
 
           <button className="primary-btn" disabled={loading}>
             {loading
