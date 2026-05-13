@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const { init_db } = require("./sync");
+const { models } = require("./models");
 const express = require("express");
 const { Client } = require("pg");
 const app = express();
@@ -31,7 +32,7 @@ app.use(
       "https://skincare-l0s7.onrender.com",
     ],
     credentials: true,
-  }),
+  })
 );
 
 const client = new Client({
@@ -43,9 +44,30 @@ const client = new Client({
 
 init_db(client);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+async function ensureSkinCardsForUsers() {
+  try {
+    const users = await models.User.findAll();
+
+    for (const user of users) {
+      const existingSkin = await models.Skin.findOne({
+        where: { user_id: user.id },
+      });
+
+      if (!existingSkin) {
+        await models.Skin.create({
+          user_id: user.id,
+          type: "Не визначено",
+          description:
+            "Картка шкіри створена автоматично для користувача без профілю шкіри",
+        });
+      }
+    }
+
+    console.log("Skin cards check completed");
+  } catch (error) {
+    console.error("Skin cards check error:", error.message);
+  }
+}
 
 app.use("/api", environmentDataRouter);
 app.use("/api/admin", adminRouter);
@@ -64,3 +86,8 @@ app.use(
     },
   })
 );
+
+app.listen(PORT, async () => {
+  console.log(`Server is running on port ${PORT}`);
+  await ensureSkinCardsForUsers();
+});
