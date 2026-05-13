@@ -1,0 +1,63 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      APP_PORT: 3000
+
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: skincare_db
+      DB_USER: skincare_user
+      DB_PASSWORD: skincare_password
+
+      SECRET_KEY: scale_demo_secret_key
+    depends_on:
+      - db
+    networks:
+      - skincare-scale
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.scale.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - skincare-scale
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: skincare_db
+      POSTGRES_USER: skincare_user
+      POSTGRES_PASSWORD: skincare_password
+    ports:
+      - "5436:5432"
+    volumes:
+      - skincare_scale_db:/var/lib/postgresql/data
+    networks:
+      - skincare-scale
+
+  k6:
+    image: grafana/k6:latest
+    profiles:
+      - test
+    volumes:
+      - ./load-tests:/scripts
+    command: run /scripts/health-test.js
+    depends_on:
+      - nginx
+    networks:
+      - skincare-scale
+
+networks:
+  skincare-scale:
+    driver: bridge
+
+volumes:
+  skincare_scale_db:

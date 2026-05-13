@@ -26,12 +26,47 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "http://localhost:3001",
       "http://localhost:5173",
+      "http://localhost:8080",
       "https://skincare-l0s7.onrender.com",
     ],
     credentials: true,
   })
 );
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "skincare-backend",
+    instance:
+      process.env.INSTANCE_NAME ||
+      process.env.HOSTNAME ||
+      require("os").hostname(),
+    port: PORT,
+    time: new Date().toISOString(),
+  });
+});
+app.get("/api/scale-test", (req, res) => {
+  const startedAt = Date.now();
+
+  let result = 0;
+
+  for (let i = 0; i < 2500000; i += 1) {
+    result += Math.sqrt(i);
+  }
+
+  res.json({
+    status: "ok",
+    service: "skincare-backend",
+    instance:
+      process.env.INSTANCE_NAME ||
+      process.env.HOSTNAME ||
+      require("os").hostname(),
+    durationMs: Date.now() - startedAt,
+    result: Number(result.toFixed(2)),
+    time: new Date().toISOString(),
+  });
+});
 
 async function ensureSkinCardsForUsers() {
   try {
