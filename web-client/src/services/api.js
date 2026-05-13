@@ -76,6 +76,10 @@ export const api = {
     return await request("/api/admin/skin");
   },
 
+  async mySkin() {
+    return await request("/api/users/me/skin");
+  },
+
   async updateSkin(id, data) {
     return await request(`/api/admin/skin/${id}`, {
       method: "PUT",

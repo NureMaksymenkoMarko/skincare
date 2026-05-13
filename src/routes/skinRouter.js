@@ -1,19 +1,16 @@
 const express = require("express");
-const adminMiddleware = require("../middleware/isAdmin.js");
-const authMiddleware = require("../middleware/auth.js");
-
 const userRouter = express.Router();
 
-const {
-  getAnalysisById,
-  getAllAnalyses,
-  getAnalysesBySkin,
-  getAnalysesByUserId,
-} = require("../controllers/analysisController");
+const authMiddleware = require("../middleware/auth.js");
 
-userRouter.get("/analysis", adminMiddleware, getAllAnalyses);
-userRouter.get("/analysis/:id", authMiddleware, getAnalysisById);
-userRouter.get("/skin/:skinId/analyses", authMiddleware, getAnalysesBySkin);
-userRouter.get("/users/:userId/analysis", authMiddleware, getAnalysesByUserId);
+const {
+  getSkinById,
+  getSkinByUserId,
+  getMySkin,
+} = require("../controllers/skinController");
+
+userRouter.get("/users/me/skin", authMiddleware, getMySkin);
+userRouter.get("/skin/:id", authMiddleware, getSkinById);
+userRouter.get("/users/:userId/skin", authMiddleware, getSkinByUserId);
 
 module.exports = userRouter;

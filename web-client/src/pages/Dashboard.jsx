@@ -1,6 +1,13 @@
 import StatCard from "../components/StatCard";
 
-export default function Dashboard({ t, user, users, records, environment }) {
+export default function Dashboard({
+  t,
+  user,
+  users,
+  records,
+  environment,
+  skins = [],
+}) {
   const avg = (arr, key) =>
     arr.length
       ? (
@@ -9,33 +16,53 @@ export default function Dashboard({ t, user, users, records, environment }) {
         ).toFixed(1)
       : "—";
 
+  function getSkinUserId(skin) {
+    return (
+      skin.user_id ||
+      skin.userId ||
+      skin.UserId ||
+      skin.user?.id ||
+      skin.User?.id
+    );
+  }
+
+  function getCurrentUserSkin() {
+    if (!user) return null;
+
+    return skins.find(
+      (skin) => Number(getSkinUserId(skin)) === Number(user.id)
+    );
+  }
+
+  const currentSkin = getCurrentUserSkin();
+
   const clientCards = [
     {
-      title: "Персональний догляд",
-      text: "У цьому розділі користувач може переглядати рекомендації, які допомагають підібрати щоденний догляд відповідно до стану шкіри.",
+      title: t.personalCareTitle,
+      text: t.personalCareText,
     },
     {
-      title: "Контроль середовища",
-      text: "IoT-показники температури та вологості допомагають оцінити умови, які можуть впливати на сухість, подразнення або жирність шкіри.",
+      title: t.environmentControlTitle,
+      text: t.environmentControlText,
     },
     {
-      title: "Історія стану шкіри",
-      text: "Користувач може переглядати результати аналізів і відстежувати зміни стану шкіри після процедур або курсу догляду.",
+      title: t.skinHistoryTitle,
+      text: t.skinHistoryText,
     },
   ];
 
   const adminCards = [
     {
-      title: "Керування пацієнтами",
-      text: "Косметолог може переглядати список пацієнтів, контролювати їхні профілі та працювати з даними користувачів системи.",
+      title: t.patientManagementTitle,
+      text: t.patientManagementText,
     },
     {
-      title: "Контроль аналізів",
-      text: "Адміністратор має доступ до записів аналізу шкіри, може створювати нові записи та переглядати результати пацієнтів.",
+      title: t.analysisControlTitle,
+      text: t.analysisControlText,
     },
     {
-      title: "IoT-моніторинг",
-      text: "Система відображає показники середовища для пацієнтів, що дозволяє враховувати температуру та вологість при догляді за шкірою.",
+      title: t.iotMonitoringTitle,
+      text: t.iotMonitoringText,
     },
   ];
 
@@ -49,15 +76,25 @@ export default function Dashboard({ t, user, users, records, environment }) {
           <h3>{user?.is_admin ? t.introAdmin : t.introUser}</h3>
         </div>
 
-        <div className="api-chip">Режим системи: активний</div>
+        <div className="api-chip">
+          {t.apiMode}: {t.apiReal}
+        </div>
       </div>
 
       <div className="stats-grid">
         {user?.is_admin && (
-          <StatCard label={t.totalUsers} value={users.length} hint="Пацієнти системи" />
+          <StatCard
+            label={t.totalUsers}
+            value={users.length}
+            hint={t.systemPatients}
+          />
         )}
 
-        <StatCard label={t.totalRecords} value={records.length} hint="Записи аналізу" />
+        <StatCard
+          label={t.totalRecords}
+          value={records.length}
+          hint={t.analysisRecords}
+        />
 
         <StatCard
           label={t.avgTemp}
@@ -71,6 +108,22 @@ export default function Dashboard({ t, user, users, records, environment }) {
           hint="IoT DHT22"
         />
       </div>
+
+      {!user?.is_admin && (
+        <div className="hero-card">
+          <div>
+            <p className="eyebrow">{t.mySkinState}</p>
+            <h3>{currentSkin?.type || t.notDefined}</h3>
+            <p className="skin-description">
+              {currentSkin?.description || t.noSkinDescription}
+            </p>
+          </div>
+
+          <div className="api-chip">
+            {t.skinId}: {currentSkin?.id || "—"}
+          </div>
+        </div>
+      )}
 
       <div className="info-grid">
         {cards.map((card) => (

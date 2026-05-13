@@ -46,33 +46,10 @@ export default function App() {
 
       try {
         if (user.is_admin) {
-          try {
-            loadedSkins = await api.skins();
-          } catch (error) {
-            console.warn("All skins loading error:", error);
-            loadedSkins = [];
-          }
-
-          if (!loadedSkins || loadedSkins.length === 0) {
-            const skinGroups = await Promise.all(
-              loadedUsers.map(async (item) => {
-                try {
-                  return await api.skinByUserId(item.id);
-                } catch {
-                  return null;
-                }
-              })
-            );
-
-            loadedSkins = skinGroups.filter(Boolean);
-          }
+          loadedSkins = await api.skins();
         } else {
-          try {
-            const currentUserSkin = await api.skinByUserId(user.id);
-            loadedSkins = currentUserSkin ? [currentUserSkin] : [];
-          } catch {
-            loadedSkins = [];
-          }
+          const currentUserSkin = await api.mySkin();
+          loadedSkins = currentUserSkin ? [currentUserSkin] : [];
         }
       } catch (error) {
         console.warn("Skins loading error:", error);

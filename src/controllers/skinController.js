@@ -215,6 +215,45 @@ const getSkinByUserId = async (req, res) => {
 
 /**
  * @openapi
+ * /api/users/me/skin:
+ *   get:
+ *     tags: [Skin]
+ *     summary: Get current user skin profile
+ *     description: Returns skin profile connected to the currently authenticated user.
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user's skin profile or null if it does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - $ref: "#/components/schemas/Skin"
+ *                 - type: "null"
+ *       400:
+ *         description: Request error
+ */
+const getMySkin = async (req, res) => {
+  const userId = req.user_id;
+
+  try {
+    const skin = await models.Skin.findOne({
+      where: { user_id: userId },
+    });
+
+    if (!skin) {
+      return res.json(null);
+    }
+
+    return res.json(skin);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * @openapi
  * /api/admin/skin/{id}:
  *   put:
  *     tags: [Skin]
@@ -259,7 +298,10 @@ const updateSkin = async (req, res) => {
     }
 
     if (type) skin.type = type;
-    if (description) skin.description = description;
+
+    if (description !== undefined) {
+      skin.description = description;
+    }
 
     await skin.save();
 
@@ -315,6 +357,7 @@ module.exports = {
   createSkin,
   getSkinById,
   getSkinByUserId,
+  getMySkin,
   getAllSkins,
   updateSkin,
   deleteSkin,
