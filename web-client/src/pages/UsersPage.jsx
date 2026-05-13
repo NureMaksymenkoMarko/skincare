@@ -2,7 +2,13 @@ import DataTable from "../components/DataTable";
 
 export default function UsersPage({ t, users, skins }) {
   function getSkinUserId(skin) {
-    return skin.user_id || skin.userId || skin.UserId || skin.user?.id;
+    return (
+      skin.user_id ||
+      skin.userId ||
+      skin.UserId ||
+      skin.user?.id ||
+      skin.User?.id
+    );
   }
 
   function getSkinForUser(userId) {

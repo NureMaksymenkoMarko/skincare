@@ -37,10 +37,12 @@ export const api = {
   },
 
   async register(name, email, password) {
-    return await request("/api/register", {
+    await request("/api/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password }),
     });
+
+    return await this.me();
   },
 
   async me() {
@@ -62,6 +64,14 @@ export const api = {
     return await request(`/api/users/${id}`, {
       method: "DELETE",
     });
+  },
+
+  async skins() {
+    return await request("/api/skin");
+  },
+
+  async skinByUserId(userId) {
+    return await request(`/api/users/${userId}/skin`);
   },
 
   async environment(userId) {

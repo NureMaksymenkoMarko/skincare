@@ -69,6 +69,12 @@ const COOKIE_OPTIONS = {
  *         password:
  *           type: string
  *           example: Qwerty123!
+ *         skin_type:
+ *           type: string
+ *           example: Суха шкіра
+ *         skin_description:
+ *           type: string
+ *           example: Є сухість та подразнення шкіри
  *
  *     UpdateUserRequest:
  *       type: object
@@ -97,14 +103,9 @@ const COOKIE_OPTIONS = {
  *           type: string
  *           format: email
  *           example: john@example.com
- *         createdAt:
- *           type: string
- *           format: date-time
- *           example: 2025-12-20T12:00:00.000Z
- *         updatedAt:
- *           type: string
- *           format: date-time
- *           example: 2025-12-20T12:00:00.000Z
+ *         is_admin:
+ *           type: boolean
+ *           example: false
  */
 
 /**
@@ -113,7 +114,7 @@ const COOKIE_OPTIONS = {
  *   post:
  *     tags: [Auth]
  *     summary: Login user
- *     description: Validates credentials and sets HttpOnly cookie "access" with JWT (expires in 3h).
+ *     description: Validates credentials and sets HttpOnly cookie "access" with JWT.
  *     requestBody:
  *       required: true
  *       content:
@@ -122,11 +123,7 @@ const COOKIE_OPTIONS = {
  *             $ref: "#/components/schemas/LoginRequest"
  *     responses:
  *       200:
- *         description: Login successful (cookie is set)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/MessageResponse"
+ *         description: Login successful
  *       401:
  *         description: Invalid password
  *       404:
@@ -166,7 +163,7 @@ const login = async (req, res) => {
  *   post:
  *     tags: [Auth]
  *     summary: Register new user
- *     description: Creates user, hashes password, creates default skin card, sets HttpOnly cookie "access" with JWT (expires in 3h). Returns user without password.
+ *     description: Creates user, hashes password, creates skin profile and sets HttpOnly cookie "access".
  *     requestBody:
  *       required: true
  *       content:
@@ -175,12 +172,12 @@ const login = async (req, res) => {
  *             $ref: "#/components/schemas/RegisterRequest"
  *     responses:
  *       201:
- *         description: Created user (without password)
+ *         description: Created user
  *       400:
  *         description: Validation/creation error
  */
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, skin_type, skin_description } = req.body;
 
   try {
     const existingUser = await models.User.findOne({ where: { email } });
@@ -202,8 +199,9 @@ const register = async (req, res) => {
 
     await models.Skin.create({
       user_id: user.id,
-      type: "Не визначено",
+      type: skin_type || "Не визначено",
       description:
+        skin_description ||
         "Картка шкіри створена автоматично під час реєстрації користувача",
     });
 
@@ -225,12 +223,12 @@ const register = async (req, res) => {
  * /api/users/me:
  *   get:
  *     tags: [Users]
- *     summary: Get current user by token (cookie)
+ *     summary: Get current user by token
  *     security:
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: Current user (without password)
+ *         description: Current user
  *       404:
  *         description: User not found
  *       400:
@@ -269,10 +267,9 @@ const getUserByToken = async (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
- *         example: 1
  *     responses:
  *       200:
- *         description: User (without password)
+ *         description: User
  *       404:
  *         description: User not found
  *       400:
@@ -307,7 +304,7 @@ const getUserById = async (req, res) => {
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: List of users (without password)
+ *         description: List of users
  *       400:
  *         description: Request error
  */
@@ -330,7 +327,6 @@ const getAllUsers = async (req, res) => {
  *   put:
  *     tags: [Users]
  *     summary: Update user
- *     description: Updates user if requester is the same user (req.user_id must match :id). If password is provided, it will be hashed.
  *     security:
  *       - cookieAuth: []
  *     parameters:
@@ -339,7 +335,6 @@ const getAllUsers = async (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
- *         example: 1
  *     requestBody:
  *       required: true
  *       content:
@@ -348,7 +343,7 @@ const getAllUsers = async (req, res) => {
  *             $ref: "#/components/schemas/UpdateUserRequest"
  *     responses:
  *       200:
- *         description: Updated user (without password)
+ *         description: Updated user
  *       401:
  *         description: Not authorized
  *       404:
@@ -403,10 +398,9 @@ const updateUser = async (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
- *         example: 1
  *     responses:
  *       204:
- *         description: Deleted successfully (no content)
+ *         description: Deleted successfully
  *       404:
  *         description: User not found
  *       400:
