@@ -2,24 +2,24 @@ import { useState } from "react";
 import DataTable from "../components/DataTable";
 import { api } from "../services/api";
 
-const analysisTypes = [
-  "Загальний аналіз крові",
-  "Аналіз рівня глюкози",
-  "Зішкріб шкіри",
-  "Алергологічні проби",
-  "Аналіз на вітаміни та мікроелементи",
-  "Photo analysis",
-  "Огляд стану шкіри",
-];
-
-const resultTemplates = [
-  "Патологічних змін не виявлено. Рекомендовано продовжити базовий догляд.",
-  "Виявлено ознаки сухості та подразнення шкіри. Рекомендовано зволожувальний догляд.",
-  "Спостерігається підвищена жирність у T-зоні. Рекомендовано очищення та контроль себуму.",
-  "Виявлено реакцію на косметичні компоненти. Рекомендовано тимчасово виключити подразники.",
-];
-
 export default function RecordsPage({ t, records, setRecords, isAdmin }) {
+  const analysisTypes = [
+    t.analysisTypeBlood,
+    t.analysisTypeGlucose,
+    t.analysisTypeScraping,
+    t.analysisTypeAllergy,
+    t.analysisTypeVitamins,
+    t.analysisTypePhoto,
+    t.analysisTypeSkinReview,
+  ];
+
+  const resultTemplates = [
+    t.templateNoPathology,
+    t.templateDryness,
+    t.templateOiliness,
+    t.templateReaction,
+  ];
+
   const [form, setForm] = useState({
     analysis_type: analysisTypes[0],
     result: "",
@@ -28,17 +28,17 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
 
   async function createAnalysis() {
     if (!form.analysis_type.trim()) {
-      alert("Оберіть або введіть тип аналізу");
+      alert(t.chooseAnalysisType);
       return;
     }
 
     if (!form.result.trim()) {
-      alert("Введіть результат аналізу");
+      alert(t.enterAnalysisResult);
       return;
     }
 
     if (!form.skin_id || Number(form.skin_id) <= 0) {
-      alert("Введіть коректний ID шкіри клієнта");
+      alert(t.enterCorrectSkinId);
       return;
     }
 
@@ -57,15 +57,15 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
         skin_id: "",
       });
 
-      alert("Аналіз успішно створено");
+      alert(t.analysisCreated);
     } catch (error) {
-      alert(`Не вдалося створити аналіз: ${error.message}`);
+      alert(`${t.cannotCreateAnalysis}: ${error.message}`);
       console.error("Create analysis error:", error);
     }
   }
 
   async function removeAnalysis(id) {
-    const confirmed = confirm("Ви точно хочете видалити цей аналіз?");
+    const confirmed = confirm(t.confirmDeleteAnalysis);
 
     if (!confirmed) return;
 
@@ -73,7 +73,7 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
       await api.deleteAnalysis(id);
       setRecords(records.filter((record) => record.id !== id));
     } catch (error) {
-      alert(`Не вдалося видалити аналіз: ${error.message}`);
+      alert(`${t.cannotDeleteAnalysis}: ${error.message}`);
       console.error("Delete analysis error:", error);
     }
   }
@@ -85,17 +85,17 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
     },
     {
       key: "analysis_type",
-      label: "Тип аналізу",
+      label: t.analysisType,
       render: (row) => row.analysis_type || "—",
     },
     {
       key: "result",
-      label: "Результат",
+      label: t.result,
       render: (row) => row.result || "—",
     },
     {
       key: "skin_id",
-      label: "ID шкіри",
+      label: t.skinId,
       render: (row) => row.skin_id || "—",
     },
     ...(isAdmin
@@ -120,26 +120,22 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
     <section className="page-block">
       <div className="section-title">
         <p className="eyebrow">Skin analysis</p>
-        <h3>Аналізи шкіри</h3>
+        <h3>{t.skinAnalysis}</h3>
       </div>
 
       {isAdmin && (
         <div className="form-card analysis-form-card">
           <div className="analysis-form-header">
             <div>
-              <p className="eyebrow">New analysis</p>
-              <h4>Новий аналіз шкіри</h4>
-              <p>
-                Оберіть тип аналізу, введіть результат та вкажіть ID шкіри
-                клієнта. ID шкіри можна подивитися у розділі
-                <strong> “Користувачі”</strong>.
-              </p>
+              <p className="eyebrow">{t.newAnalysisEyebrow}</p>
+              <h4>{t.newAnalysis}</h4>
+              <p>{t.newAnalysisDescription}</p>
             </div>
           </div>
 
           <div className="analysis-form-grid">
             <label>
-              Тип аналізу
+              {t.analysisType}
               <select
                 value={form.analysis_type}
                 onChange={(e) =>
@@ -155,11 +151,11 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
             </label>
 
             <label>
-              ID шкіри клієнта
+              {t.clientSkinId}
               <input
                 type="number"
                 min="1"
-                placeholder="Наприклад: 1"
+                placeholder={t.clientSkinIdPlaceholder}
                 value={form.skin_id}
                 onChange={(e) => setForm({ ...form, skin_id: e.target.value })}
               />
@@ -167,17 +163,17 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
           </div>
 
           <label>
-            Результат аналізу
+            {t.analysisResult}
             <textarea
               className="analysis-result-input"
-              placeholder="Опишіть результат аналізу, виявлені особливості стану шкіри та коротку рекомендацію..."
+              placeholder={t.analysisResultPlaceholder}
               value={form.result}
               onChange={(e) => setForm({ ...form, result: e.target.value })}
             />
           </label>
 
           <div className="template-block">
-            <p>Швидкі шаблони результату:</p>
+            <p>{t.quickResultTemplates}</p>
 
             <div className="template-buttons">
               {resultTemplates.map((template) => (
@@ -204,11 +200,11 @@ export default function RecordsPage({ t, records, setRecords, isAdmin }) {
                 })
               }
             >
-              Очистити
+              {t.clear}
             </button>
 
             <button className="primary-btn" onClick={createAnalysis}>
-              Створити аналіз
+              {t.createAnalysis}
             </button>
           </div>
         </div>

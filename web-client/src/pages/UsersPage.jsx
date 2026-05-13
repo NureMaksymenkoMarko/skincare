@@ -2,19 +2,19 @@ import { useEffect, useState } from "react";
 import DataTable from "../components/DataTable";
 import { api } from "../services/api";
 
-const skinTypeOptions = [
-  "Не визначено",
-  "Normal",
-  "Суха шкіра",
-  "Жирна шкіра",
-  "Комбінована шкіра",
-  "Чутлива шкіра",
-  "Зневоднена шкіра",
-  "Подразнена шкіра",
-  "Проблемна шкіра з висипаннями",
-];
-
 export default function UsersPage({ t, users, skins }) {
+  const skinTypeOptions = [
+    t.notDefined,
+    t.skinTypeNormal,
+    t.skinTypeDry,
+    t.skinTypeOily,
+    t.skinTypeCombination,
+    t.skinTypeSensitive,
+    t.skinTypeDehydrated,
+    t.skinTypeIrritated,
+    t.skinTypeProblem,
+  ];
+
   const [localSkins, setLocalSkins] = useState(skins || []);
   const [editing, setEditing] = useState({});
 
@@ -74,7 +74,7 @@ export default function UsersPage({ t, users, skins }) {
     const skin = getSkinForUser(row.id);
 
     if (!skin) {
-      alert("Для цього користувача не знайдено ID шкіри");
+      alert(t.skinNotFoundForUser);
       return;
     }
 
@@ -84,7 +84,7 @@ export default function UsersPage({ t, users, skins }) {
     const newDescription = editing[key]?.description ?? skin.description ?? "";
 
     if (!newType.trim()) {
-      alert("Введіть тип шкіри");
+      alert(t.enterSkinType);
       return;
     }
 
@@ -106,9 +106,9 @@ export default function UsersPage({ t, users, skins }) {
         return copy;
       });
 
-      alert("Дані шкіри оновлено");
+      alert(t.skinDataUpdated);
     } catch (error) {
-      alert(`Не вдалося оновити дані шкіри: ${error.message}`);
+      alert(`${t.cannotUpdateSkin}: ${error.message}`);
       console.error("Update skin error:", error);
     }
   }
@@ -116,7 +116,7 @@ export default function UsersPage({ t, users, skins }) {
   const columns = [
     {
       key: "id",
-      label: "ID користувача",
+      label: t.userId,
     },
     {
       key: "name",
@@ -133,7 +133,7 @@ export default function UsersPage({ t, users, skins }) {
     },
     {
       key: "skin_id",
-      label: "ID шкіри",
+      label: t.skinId,
       render: (row) => {
         const skin = getSkinForUser(row.id);
         return skin ? skin.id : "—";
@@ -141,7 +141,7 @@ export default function UsersPage({ t, users, skins }) {
     },
     {
       key: "skin_type",
-      label: "Тип шкіри",
+      label: t.skinType,
       render: (row) => {
         const skin = getSkinForUser(row.id);
 
@@ -164,7 +164,7 @@ export default function UsersPage({ t, users, skins }) {
     },
     {
       key: "skin_description",
-      label: "Опис шкіри",
+      label: t.skinDescription,
       render: (row) => {
         const skin = getSkinForUser(row.id);
 
@@ -177,14 +177,14 @@ export default function UsersPage({ t, users, skins }) {
             onChange={(e) =>
               updateEditValue(row.id, "description", e.target.value)
             }
-            placeholder="Короткий опис стану шкіри"
+            placeholder={t.shortSkinDescription}
           />
         );
       },
     },
     {
       key: "actions",
-      label: "Дії",
+      label: t.actions,
       render: (row) => {
         const skin = getSkinForUser(row.id);
 
@@ -195,7 +195,7 @@ export default function UsersPage({ t, users, skins }) {
             className="primary-btn table-save-btn"
             onClick={() => saveSkin(row)}
           >
-            Зберегти
+            {t.save}
           </button>
         );
       },
@@ -205,17 +205,13 @@ export default function UsersPage({ t, users, skins }) {
   return (
     <section className="page-block">
       <div className="section-title">
-        <p className="eyebrow">Admin</p>
+        <p className="eyebrow">{t.adminPanel}</p>
         <h3>{t.users}</h3>
       </div>
 
       <div className="info-card">
-        <h4>Картки шкіри пацієнтів</h4>
-        <p>
-          Тут адміністратор може переглянути ID шкіри кожного користувача,
-          змінити тип шкіри та додати короткий опис стану. Саме ID шкіри
-          використовується при створенні нового аналізу.
-        </p>
+        <h4>{t.patientSkinCards}</h4>
+        <p>{t.patientSkinCardsText}</p>
       </div>
 
       <DataTable rows={users} columns={columns} t={t} initialSort="name" />
