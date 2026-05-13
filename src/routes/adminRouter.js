@@ -2,6 +2,7 @@ const express = require("express");
 const adminMiddleware = require("../middleware/isAdmin.js");
 
 const adminRouter = express.Router();
+
 const { getAllUsers } = require("../controllers/userController");
 
 const {
@@ -9,21 +10,27 @@ const {
   updateAnalysis,
   deleteAnalysis,
 } = require("../controllers/analysisController");
+
 const {
   createSkinAnalysisRecord,
   updateSkinAnalysisRecord,
   deleteSkinAnalysisRecord,
 } = require("../controllers/skinAnalysisRecordController");
+
 const {
   createTreatment,
   updateTreatment,
   deleteTreatment,
 } = require("../controllers/treatmentController");
+
 const {
   createSkin,
+  getAllSkins,
   updateSkin,
   deleteSkin,
 } = require("../controllers/skinController");
+
+adminRouter.get("/users", adminMiddleware, getAllUsers);
 
 adminRouter.post("/analysis", adminMiddleware, createAnalysis);
 adminRouter.put("/analysis/:id", adminMiddleware, updateAnalysis);
@@ -37,10 +44,9 @@ adminRouter.post("/treatment", adminMiddleware, createTreatment);
 adminRouter.put("/treatment/:id", adminMiddleware, updateTreatment);
 adminRouter.delete("/treatment/:id", adminMiddleware, deleteTreatment);
 
+adminRouter.get("/skin", adminMiddleware, getAllSkins);
 adminRouter.post("/skin", adminMiddleware, createSkin);
 adminRouter.put("/skin/:id", adminMiddleware, updateSkin);
 adminRouter.delete("/skin/:id", adminMiddleware, deleteSkin);
-
-adminRouter.get("/users", adminMiddleware, getAllUsers);
 
 module.exports = adminRouter;

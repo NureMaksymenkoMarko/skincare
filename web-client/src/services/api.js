@@ -73,11 +73,7 @@ export const api = {
   },
 
   async skins() {
-    return await request("/api/skin");
-  },
-
-  async skinByUserId(userId) {
-    return await request(`/api/users/${userId}/skin`);
+    return await request("/api/admin/skin");
   },
 
   async updateSkin(id, data) {

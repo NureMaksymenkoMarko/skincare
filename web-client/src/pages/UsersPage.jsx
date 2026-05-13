@@ -19,7 +19,17 @@ export default function UsersPage({ t, users, skins }) {
   const [editing, setEditing] = useState({});
 
   useEffect(() => {
-    setLocalSkins(skins || []);
+    async function loadSkins() {
+      try {
+        const loadedSkins = await api.skins();
+        setLocalSkins(loadedSkins || []);
+      } catch (error) {
+        console.error("Cannot load skins:", error);
+        setLocalSkins(skins || []);
+      }
+    }
+
+    loadSkins();
   }, [skins]);
 
   function getSkinUserId(skin) {
@@ -71,7 +81,7 @@ export default function UsersPage({ t, users, skins }) {
     const key = String(row.id);
 
     const newType = editing[key]?.type ?? skin.type;
-    const newDescription = editing[key]?.description ?? skin.description;
+    const newDescription = editing[key]?.description ?? skin.description ?? "";
 
     if (!newType.trim()) {
       alert("Введіть тип шкіри");
