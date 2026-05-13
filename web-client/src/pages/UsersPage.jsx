@@ -2,21 +2,59 @@ import { useEffect, useState } from "react";
 import DataTable from "../components/DataTable";
 import { api } from "../services/api";
 
-export default function UsersPage({ t, users, skins }) {
-  const skinTypeOptions = [
-    t.notDefined,
-    t.skinTypeNormal,
-    t.skinTypeDry,
-    t.skinTypeOily,
-    t.skinTypeCombination,
-    t.skinTypeSensitive,
-    t.skinTypeDehydrated,
-    t.skinTypeIrritated,
-    t.skinTypeProblem,
-  ];
+const skinTypeOptions = [
+  {
+    value: "Не визначено",
+    uk: "Не визначено",
+    en: "Not defined",
+  },
+  {
+    value: "Normal",
+    uk: "Normal",
+    en: "Normal",
+  },
+  {
+    value: "Суха шкіра",
+    uk: "Суха шкіра",
+    en: "Dry skin",
+  },
+  {
+    value: "Жирна шкіра",
+    uk: "Жирна шкіра",
+    en: "Oily skin",
+  },
+  {
+    value: "Комбінована шкіра",
+    uk: "Комбінована шкіра",
+    en: "Combination skin",
+  },
+  {
+    value: "Чутлива шкіра",
+    uk: "Чутлива шкіра",
+    en: "Sensitive skin",
+  },
+  {
+    value: "Зневоднена шкіра",
+    uk: "Зневоднена шкіра",
+    en: "Dehydrated skin",
+  },
+  {
+    value: "Подразнена шкіра",
+    uk: "Подразнена шкіра",
+    en: "Irritated skin",
+  },
+  {
+    value: "Проблемна шкіра з висипаннями",
+    uk: "Проблемна шкіра з висипаннями",
+    en: "Problem skin with breakouts",
+  },
+];
 
+export default function UsersPage({ t, users, skins }) {
   const [localSkins, setLocalSkins] = useState(skins || []);
   const [editing, setEditing] = useState({});
+
+  const isEnglish = t.language === "Language";
 
   useEffect(() => {
     async function loadSkins() {
@@ -48,11 +86,38 @@ export default function UsersPage({ t, users, skins }) {
     );
   }
 
+  function normalizeSkinType(value) {
+    if (!value) return "Не визначено";
+
+    const found = skinTypeOptions.find(
+      (option) =>
+        option.value === value || option.uk === value || option.en === value
+    );
+
+    return found ? found.value : value;
+  }
+
+  function getSkinTypeLabel(value) {
+    const normalized = normalizeSkinType(value);
+
+    const found = skinTypeOptions.find(
+      (option) => option.value === normalized
+    );
+
+    if (!found) return normalized;
+
+    return isEnglish ? found.en : found.uk;
+  }
+
   function getEditValue(userId, field, fallback = "") {
     const key = String(userId);
 
     if (editing[key] && editing[key][field] !== undefined) {
       return editing[key][field];
+    }
+
+    if (field === "type") {
+      return normalizeSkinType(fallback);
     }
 
     return fallback || "";
@@ -80,7 +145,7 @@ export default function UsersPage({ t, users, skins }) {
 
     const key = String(row.id);
 
-    const newType = editing[key]?.type ?? skin.type;
+    const newType = normalizeSkinType(editing[key]?.type ?? skin.type);
     const newDescription = editing[key]?.description ?? skin.description ?? "";
 
     if (!newType.trim()) {
@@ -153,9 +218,9 @@ export default function UsersPage({ t, users, skins }) {
             value={getEditValue(row.id, "type", skin.type)}
             onChange={(e) => updateEditValue(row.id, "type", e.target.value)}
           >
-            {skinTypeOptions.map((type) => (
-              <option key={type} value={type}>
-                {type}
+            {skinTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {isEnglish ? option.en : option.uk}
               </option>
             ))}
           </select>
