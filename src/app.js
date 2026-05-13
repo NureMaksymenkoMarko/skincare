@@ -2,10 +2,8 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
-const { init_db } = require("./sync");
 const { models } = require("./models");
 const express = require("express");
-const { Client } = require("pg");
 const app = express();
 const PORT = process.env.APP_PORT || 3000;
 
@@ -34,15 +32,6 @@ app.use(
     credentials: true,
   })
 );
-
-const client = new Client({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 5435,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-});
-
-init_db(client);
 
 async function ensureSkinCardsForUsers() {
   try {
