@@ -5,6 +5,13 @@ const jwt = require("jsonwebtoken");
 const TOKEN_MAX_AGE = 60 * 60 * 3 * 1000;
 const SECRET_KEY = process.env.SECRET_KEY || "default_secret_key";
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: TOKEN_MAX_AGE,
+};
+
 /**
  * @openapi
  * tags:
@@ -122,26 +129,10 @@ const SECRET_KEY = process.env.SECRET_KEY || "default_secret_key";
  *               $ref: "#/components/schemas/MessageResponse"
  *       401:
  *         description: Invalid password
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/MessageResponse"
- *             example:
- *               message: Invalid password
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/MessageResponse"
- *             example:
- *               message: User not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -161,14 +152,11 @@ const login = async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: "3h" });
 
-    res.cookie("access", token, {
-      httpOnly: true,
-      maxAge: TOKEN_MAX_AGE,
-    });
+    res.cookie("access", token, COOKIE_OPTIONS);
 
-    res.status(200).json({ message: "Login successful" });
+    return res.status(200).json({ message: "Login successful" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -188,16 +176,8 @@ const login = async (req, res) => {
  *     responses:
  *       201:
  *         description: Created user (without password)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/User"
  *       400:
  *         description: Validation/creation error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -213,17 +193,14 @@ const register = async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: "3h" });
 
-    res.cookie("access", token, {
-      httpOnly: true,
-      maxAge: TOKEN_MAX_AGE,
-    });
+    res.cookie("access", token, COOKIE_OPTIONS);
 
     const userWithoutPassword = { ...user.toJSON() };
     delete userWithoutPassword.password;
 
-    res.status(201).json(userWithoutPassword);
+    return res.status(201).json(userWithoutPassword);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -238,24 +215,10 @@ const register = async (req, res) => {
  *     responses:
  *       200:
  *         description: Current user (without password)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/User"
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
- *             example:
- *               error: User not found
  *       400:
  *         description: Request error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const getUserByToken = async (req, res) => {
   const id = Number(req.user_id);
@@ -263,16 +226,16 @@ const getUserByToken = async (req, res) => {
   try {
     const user = await models.User.findByPk(id);
 
-    if (user) {
-      const userWithoutPassword = { ...user.toJSON() };
-      delete userWithoutPassword.password;
-
-      res.json(userWithoutPassword);
-    } else {
-      res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
+
+    const userWithoutPassword = { ...user.toJSON() };
+    delete userWithoutPassword.password;
+
+    return res.json(userWithoutPassword);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -294,24 +257,10 @@ const getUserByToken = async (req, res) => {
  *     responses:
  *       200:
  *         description: User (without password)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/User"
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
- *             example:
- *               error: User not found
  *       400:
  *         description: Request error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const getUserById = async (req, res) => {
   const { id } = req.params;
@@ -319,16 +268,16 @@ const getUserById = async (req, res) => {
   try {
     const user = await models.User.findByPk(id);
 
-    if (user) {
-      const userWithoutPassword = { ...user.toJSON() };
-      delete userWithoutPassword.password;
-
-      res.json(userWithoutPassword);
-    } else {
-      res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
+
+    const userWithoutPassword = { ...user.toJSON() };
+    delete userWithoutPassword.password;
+
+    return res.json(userWithoutPassword);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -343,18 +292,8 @@ const getUserById = async (req, res) => {
  *     responses:
  *       200:
  *         description: List of users (without password)
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: "#/components/schemas/User"
  *       400:
  *         description: Request error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const getAllUsers = async (req, res) => {
   try {
@@ -393,30 +332,12 @@ const getAllUsers = async (req, res) => {
  *     responses:
  *       200:
  *         description: Updated user (without password)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/User"
  *       401:
  *         description: Not authorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/MessageResponse"
- *             example:
- *               message: Not authorized
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  *       400:
  *         description: Request error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const updateUser = async (req, res) => {
   const { id } = req.params;
@@ -471,18 +392,8 @@ const updateUser = async (req, res) => {
  *         description: Deleted successfully (no content)
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
- *             example:
- *               error: User not found
  *       400:
  *         description: Request error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
  */
 const deleteUser = async (req, res) => {
   const { id } = req.params;
@@ -490,12 +401,13 @@ const deleteUser = async (req, res) => {
   try {
     const user = await models.User.findByPk(id);
 
-    if (user) {
-      await user.destroy();
-      return res.status(204).send();
-    } else {
+    if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    await user.destroy();
+
+    return res.status(204).send();
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }

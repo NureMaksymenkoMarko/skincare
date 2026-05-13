@@ -21,9 +21,15 @@ const swaggerSpec = require("./config/swagger");
 app.use(cookieParser());
 app.use(express.json());
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://skincare-l0s7.onrender.com",
+    ],
     credentials: true,
   }),
 );
