@@ -1,23 +1,19 @@
 const express = require("express");
-const userRouter = express.Router();
-
 const adminMiddleware = require("../middleware/isAdmin.js");
 const authMiddleware = require("../middleware/auth.js");
 
-const {
-  createSkin,
-  getSkinById,
-  getAllSkins,
-  getSkinByUserId,
-  updateSkin,
-  deleteSkin,
-} = require("../controllers/skinController");
+const userRouter = express.Router();
 
-userRouter.post("/admin/skin", adminMiddleware, createSkin);
-userRouter.get("/skin", adminMiddleware, getAllSkins);
-userRouter.get("/skin/:id", authMiddleware, getSkinById);
-userRouter.get("/users/:userId/skin", authMiddleware, getSkinByUserId);
-userRouter.put("/admin/skin/:id", adminMiddleware, updateSkin);
-userRouter.delete("/admin/skin/:id", adminMiddleware, deleteSkin);
+const {
+  getAnalysisById,
+  getAllAnalyses,
+  getAnalysesBySkin,
+  getAnalysesByUserId,
+} = require("../controllers/analysisController");
+
+userRouter.get("/analysis", adminMiddleware, getAllAnalyses);
+userRouter.get("/analysis/:id", authMiddleware, getAnalysisById);
+userRouter.get("/skin/:skinId/analyses", authMiddleware, getAnalysesBySkin);
+userRouter.get("/users/:userId/analysis", authMiddleware, getAnalysesByUserId);
 
 module.exports = userRouter;

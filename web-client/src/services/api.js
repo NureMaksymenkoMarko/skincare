@@ -99,6 +99,10 @@ export const api = {
     return await request("/api/analysis");
   },
 
+  async analysesByUserId(userId) {
+    return await request(`/api/users/${userId}/analysis`);
+  },
+
   async createAnalysis(data) {
     return await request("/api/admin/analysis", {
       method: "POST",

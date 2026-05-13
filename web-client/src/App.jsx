@@ -80,7 +80,11 @@ export default function App() {
       }
 
       try {
-        loadedRecords = await api.analyses();
+        if (user.is_admin) {
+          loadedRecords = await api.analyses();
+        } else {
+          loadedRecords = await api.analysesByUserId(user.id);
+        }
       } catch (error) {
         console.warn("Analysis loading error:", error);
         loadedRecords = [];
@@ -108,9 +112,6 @@ export default function App() {
         console.warn("Environment loading error:", error);
         loadedEnvironment = [];
       }
-
-      console.log("USERS:", loadedUsers);
-      console.log("SKINS:", loadedSkins);
 
       setUsers(loadedUsers);
       setSkins(loadedSkins);
@@ -151,12 +152,13 @@ export default function App() {
         users={users}
         records={visibleRecords}
         environment={environment}
+        skins={skins}
       />
     );
   }
 
   if (page === "profile") {
-    content = <Profile t={t} user={user} setUser={setUser} />;
+    content = <Profile t={t} user={user} setUser={setUser} skins={skins} />;
   }
 
   if (page === "users") {
